@@ -148,13 +148,13 @@ if expr_input:
                         x_vals = [float(xx) for xx in extremum_xs]
                         ax.scatter(x_vals, y_ext, color="red", s=3, zorder=4, label="극점")
                         if show_axis_x:
-                            ax.scatter(x_vals, np.zeros_like(x_vals), color="red", s=2, zorder=4, alpha=0.8)
+                            ax.scatter(x_vals, np.full_like(x_vals, -0.2), color="red", s=2, zorder=4, alpha=0.8)
                             for x0 in extremum_xs:
-                                ax.text(float(x0), 0, format_value(x0), color="red", fontsize=6, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(float(x0), -0.2, format_value(x0), color="red", fontsize=6, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
-                            ax.scatter(np.zeros_like(y_ext), y_ext, color="red", s=2, zorder=4, alpha=0.8)
+                            ax.scatter(np.full_like(y_ext, -0.2), y_ext, color="red", s=2, zorder=4, alpha=0.8)
                             for y0 in y_ext:
-                                ax.text(0, y0, format_value(y0), color="red", fontsize=6, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(-0.2, y0, format_value(y0), color="red", fontsize=6, ha="right", va="center", fontproperties=font_prop)
                     if inflection_xs:
                         y_inf = []
                         for x0 in inflection_xs:
@@ -165,13 +165,13 @@ if expr_input:
                         x_vals = [float(xx) for xx in inflection_xs]
                         ax.scatter(x_vals, y_inf, color="green", s=3, zorder=4, label="변곡점")
                         if show_axis_x:
-                            ax.scatter(x_vals, np.zeros_like(x_vals), color="green", s=2, zorder=4, alpha=0.8)
+                            ax.scatter(x_vals, np.full_like(x_vals, -0.2), color="green", s=2, zorder=4, alpha=0.8)
                             for x0 in inflection_xs:
-                                ax.text(float(x0), 0, format_value(x0), color="green", fontsize=6, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(float(x0), -0.2, format_value(x0), color="green", fontsize=6, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
-                            ax.scatter(np.zeros_like(y_inf), y_inf, color="green", s=2, zorder=4, alpha=0.8)
+                            ax.scatter(np.full_like(y_inf, -0.2), y_inf, color="green", s=2, zorder=4, alpha=0.8)
                             for y0 in y_inf:
-                                ax.text(0, y0, format_value(y0), color="green", fontsize=6, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(-0.2, y0, format_value(y0), color="green", fontsize=6, ha="right", va="center", fontproperties=font_prop)
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
