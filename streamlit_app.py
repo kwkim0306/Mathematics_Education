@@ -25,13 +25,14 @@ def find_zero_crossings(x_values, y_values):
 
 
 plt.rcParams.update({
-    "font.family": "DejaVu Serif",
-    "font.serif": ["DejaVu Serif", "Times New Roman", "Georgia"],
+    "font.family": "sans-serif",
+    "font.sans-serif": ["DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
     "font.weight": "normal",
-    "mathtext.fontset": "dejavuserif",
-    "mathtext.rm": "dejavuserif",
-    "mathtext.it": "dejavuserif:italic",
-    "mathtext.bf": "dejavuserif:bold"
+    "mathtext.fontset": "dejavusans",
+    "mathtext.rm": "dejavusans",
+    "mathtext.it": "dejavusans:italic",
+    "mathtext.bf": "dejavusans:bold",
+    "text.usetex": False
 })
 
 st.set_page_config(page_title="일변수 함수 그래프", layout="wide")
