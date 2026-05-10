@@ -44,7 +44,7 @@ if expr_input:
             ax.plot(xs[mask], ys[mask], color="#1f77b4", linewidth=2)
             ax.set_xlabel("x", fontsize=12, fontfamily="serif")
             ax.set_ylabel("f(x)", fontsize=12, fontfamily="serif")
-            ax.set_title(f"f(x) = {expr_input}", fontdict={"fontsize": 18, "fontfamily": "serif", "fontweight": "bold"})
+            ax.set_title(f"f(x) = {expr_input}", fontdict={"fontsize": 18, "fontfamily": "serif", "fontweight": "light"})
 
             ax.axhline(0, color="black", linewidth=1)
             ax.axvline(0, color="black", linewidth=1)
