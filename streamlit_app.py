@@ -464,6 +464,26 @@ if expr_input:
             st.write("**4. 함수의 증가/감소, 극대와 극소, 곡선의 볼록성과 변곡점 (증감표)**")
             variation_table = build_variation_table(expr, x, derivative, second_derivative, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
             st.markdown(variation_table)
+            if extremum_xs:
+                extremum_points = []
+                for x0 in extremum_xs:
+                    try:
+                        y0 = expr.subs(x, x0)
+                        extremum_points.append(r"$(%s, %s)$" % (sp.latex(sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)])), sp.latex(sp.nsimplify(y0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]))))
+                    except Exception:
+                        pass
+                if extremum_points:
+                    st.markdown(f"- 극점: {', '.join(extremum_points)}")
+            if inflection_xs:
+                inflection_points = []
+                for x0 in inflection_xs:
+                    try:
+                        y0 = expr.subs(x, x0)
+                        inflection_points.append(r"$(%s, %s)$" % (sp.latex(sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)])), sp.latex(sp.nsimplify(y0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]))))
+                    except Exception:
+                        pass
+                if inflection_points:
+                    st.markdown(f"- 변곡점: {', '.join(inflection_points)}")
 
             st.write("**5. 극한과 점근선**")
             st.markdown(f"- 우극한: $%s$  \n- 좌극한: $%s$" % (sp.latex(sp.limit(expr, x, sp.oo)), sp.latex(sp.limit(expr, x, -sp.oo))))
