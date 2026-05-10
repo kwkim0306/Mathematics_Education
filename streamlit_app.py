@@ -11,16 +11,13 @@ st.write("함수식을 입력하면 해당 함수의 그래프를 그려줍니�
 
 with st.sidebar:
     st.header("설정")
-    x_min = st.number_input("x 최소값", value=-10.0, step=1.0, format="%.2f")
-    x_max = st.number_input("x 최대값", value=10.0, step=1.0, format="%.2f")
     num_points = st.slider("표시할 점 개수", min_value=100, max_value=2000, value=500, step=100)
     show_expression = st.checkbox("입력식 표시", value=True)
 
-if x_min >= x_max:
-    st.error("x 최소값은 x 최대값보다 작아야 합니다.")
-    st.stop()
-
 expr_input = st.text_input("함수식 f(x)", value="sin(x)")
+
+x_min = -10.0
+x_max = 10.0
 
 if expr_input:
     try:
@@ -51,7 +48,6 @@ if expr_input:
 
             st.write("---")
             st.write("### 상세 정보")
-            st.write(f"- x 범위: {x_min} 부터 {x_max}")
             st.write(f"- 계산된 유효 점 개수: {np.count_nonzero(mask)} / {num_points}")
 
     except SympifyError:
