@@ -35,7 +35,19 @@ if expr_input:
             ax.set_xlabel("x")
             ax.set_ylabel("f(x)")
             ax.set_title(f"f(x) = {expr_input}")
+
+            ax.axhline(0, color="black", linewidth=1)
+            ax.axvline(0, color="black", linewidth=1)
+            ax.set_axisbelow(True)
             ax.grid(True, alpha=0.3)
+
+            for spine in ["top", "right"]:
+                ax.spines[spine].set_visible(False)
+            ax.spines["bottom"].set_color("black")
+            ax.spines["left"].set_color("black")
+            ax.spines["bottom"].set_linewidth(1)
+            ax.spines["left"].set_linewidth(1)
+
             st.pyplot(fig)
 
             st.write("---")
