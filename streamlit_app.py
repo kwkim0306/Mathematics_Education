@@ -46,6 +46,8 @@ num_points = 500
 
 expr_input = st.text_input("함수식 f(x)", value="sin(x)")
 show_special_points = st.checkbox("극점/변곡점 표시", value=False)
+show_axis_x = st.checkbox("x축에 특수점 x좌표 표시", value=False)
+show_axis_y = st.checkbox("y축에 특수점 y좌표 표시", value=False)
 
 x_min = -10.0
 x_max = 10.0
@@ -86,9 +88,25 @@ if expr_input:
                     if extremum_xs:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
                         ax.scatter(extremum_xs, y_ext, color="red", s=80, zorder=4, label="극점", edgecolors="black")
+                        if show_axis_x:
+                            ax.scatter(extremum_xs, np.zeros_like(extremum_xs), color="red", s=40, zorder=4, alpha=0.8)
+                            for x0 in extremum_xs:
+                                ax.text(x0, 0, f"{x0:.2f}", color="red", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                        if show_axis_y:
+                            ax.scatter(np.zeros_like(y_ext), y_ext, color="red", s=40, zorder=4, alpha=0.8)
+                            for y0 in y_ext:
+                                ax.text(0, y0, f"{y0:.2f}", color="red", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
                         ax.scatter(inflection_xs, y_inf, color="green", s=80, zorder=4, label="변곡점", edgecolors="black")
+                        if show_axis_x:
+                            ax.scatter(inflection_xs, np.zeros_like(inflection_xs), color="green", s=40, zorder=4, alpha=0.8)
+                            for x0 in inflection_xs:
+                                ax.text(x0, 0, f"{x0:.2f}", color="green", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                        if show_axis_y:
+                            ax.scatter(np.zeros_like(y_inf), y_inf, color="green", s=40, zorder=4, alpha=0.8)
+                            for y0 in y_inf:
+                                ax.text(0, y0, f"{y0:.2f}", color="green", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
