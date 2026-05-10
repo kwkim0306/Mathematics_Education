@@ -5,7 +5,7 @@ import sympy as sp
 import streamlit as st
 from pathlib import Path
 from sympy import SympifyError
-from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 
 NUM_POINTS = 500
 
@@ -77,7 +77,7 @@ def find_symbolic_roots(eq, x, lower, upper):
     return []
 
 
-transformations = standard_transformations + (implicit_multiplication_application,)
+transformations = standard_transformations + (implicit_multiplication_application, convert_xor)
 
 sympy_locals = {
     "x": sp.symbols("x"),
