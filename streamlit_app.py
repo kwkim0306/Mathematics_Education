@@ -98,6 +98,26 @@ def format_interval(value):
     return str(value)
 
 
+def format_limit_expression(expr, x, point):
+    direction = r"\infty" if point == sp.oo else r"-\infty"
+    try:
+        lim = sp.limit(expr, x, point)
+        if lim == sp.oo:
+            result = r"\infty"
+        elif lim == -sp.oo:
+            result = r"-\infty"
+        elif lim == sp.zoo or lim == sp.S.ComplexInfinity:
+            result = r"\infty"
+        elif lim == sp.nan:
+            return rf"$\lim_{{x \to {direction}}} f(x) \text{{은 존재하지 않음}}$"
+        else:
+            result = sp.latex(sp.nsimplify(lim, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5),
+                                                sp.sqrt(6), sp.sqrt(7), sp.sqrt(10)]))
+        return rf"$\lim_{{x \to {direction}}} f(x) = {result}$"
+    except Exception:
+        return rf"$\lim_{{x \to {direction}}} f(x) \text{{계산 불가}}$"
+
+
 def make_sign_chart(fn, critical_points, x_min, x_max):
     pts = [x_min] + sorted([float(p) for p in critical_points if x_min < float(p) < x_max]) + [x_max]
     intervals = []
@@ -466,7 +486,9 @@ if expr_input:
             st.markdown(variation_table)
 
             st.write("**5. 극한과 점근선**")
-            st.markdown(f"- 우극한: $%s$  \n- 좌극한: $%s$" % (sp.latex(sp.limit(expr, x, sp.oo)), sp.latex(sp.limit(expr, x, -sp.oo))))
+            right_limit_text = format_limit_expression(expr, x, sp.oo)
+            left_limit_text = format_limit_expression(expr, x, -sp.oo)
+            st.markdown(f"- 우극한: {right_limit_text}  \n- 좌극한: {left_limit_text}")
             if horiz_asymptotes:
                 st.markdown(f"- 수평점근선: %s" % ", ".join([r"$y=%s$" % sp.latex(h) for h in horiz_asymptotes]))
             else:
