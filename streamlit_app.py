@@ -67,9 +67,9 @@ if expr_input:
         else:
             fig, ax = plt.subplots()
             ax.plot(xs[mask], ys[mask], color="#1f77b4", linewidth=2)
-            ax.set_xlabel("x", fontsize=12, fontfamily="serif")
-            ax.set_ylabel("f(x)", fontsize=12, fontfamily="serif")
-            ax.set_title(f"f(x) = {expr_input}", fontdict={"fontsize": 18, "fontfamily": "serif", "fontweight": "light"})
+            ax.set_xlabel(r"$x$", fontsize=12, fontproperties=font_prop)
+            ax.set_ylabel(r"$f(x)$", fontsize=12, fontproperties=font_prop)
+            ax.set_title(r"$f(x) = %s$" % sp.latex(expr), fontsize=18, fontproperties=font_prop)
 
             if show_special_points:
                 try:
