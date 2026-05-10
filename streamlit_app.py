@@ -187,25 +187,45 @@ def sign_symbol(value):
     return "?"
 
 
-def format_point_label(point, extremum_xs, inflection_xs, second_derivative, x):
+def format_point_label(point, extremum_xs, inflection_xs, second_derivative, expr, x):
     if point in extremum_xs:
         sec_val = None
         try:
             sec_val = float(second_derivative.subs(x, point))
         except Exception:
             pass
+        y_val = None
+        try:
+            y_val = expr.subs(x, point)
+            y_val_simplified = sp.nsimplify(y_val, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)])
+        except Exception:
+            y_val_simplified = None
         if sec_val is not None:
             if sec_val > 0:
-                return "극소"
-            if sec_val < 0:
-                return "극대"
-        return "극값"
+                label = "극소"
+            elif sec_val < 0:
+                label = "극대"
+            else:
+                label = "극값"
+        else:
+            label = "극값"
+        if y_val_simplified is not None:
+            return r"$%s$ (%s)" % (sp.latex(y_val_simplified), label)
+        return label
     if point in inflection_xs:
+        y_val = None
+        try:
+            y_val = expr.subs(x, point)
+            y_val_simplified = sp.nsimplify(y_val, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)])
+        except Exception:
+            y_val_simplified = None
+        if y_val_simplified is not None:
+            return r"$%s$ (변곡점)" % sp.latex(y_val_simplified)
         return "변곡점"
     return ""
 
 
-def build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max):
+def build_variation_table(expr, x, derivative, second_derivative, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max):
     critical_points = sorted(set([float(p) for p in extremum_xs + inflection_xs if x_min < float(p) < x_max]))
     values = [-np.inf] + critical_points + [np.inf]
     headers = ["..."]
@@ -254,7 +274,7 @@ def build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum
             y2_point = sign_symbol(second_derivative_fn(point))
             y1_cells.append("0" if abs(derivative_fn(point)) < 1e-6 else y1_point)
             y2_cells.append("0" if abs(second_derivative_fn(point)) < 1e-6 else y2_point)
-            y_cells.append(format_point_label(point, extremum_xs, inflection_xs, second_derivative, x))
+            y_cells.append(format_point_label(point, extremum_xs, inflection_xs, second_derivative, expr, x))
 
     table_lines = []
     table_lines.append("| x | " + " | ".join(headers) + " |")
@@ -442,7 +462,7 @@ if expr_input:
             st.markdown(f"**3. 곡선의 대칭성과 주기**  \n- 대칭성: {symmetry}  \n- 주기: {period_text}")
 
             st.write("**4. 함수의 증가/감소, 극대와 극소, 곡선의 볼록성과 변곡점 (증감표)**")
-            variation_table = build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
+            variation_table = build_variation_table(expr, x, derivative, second_derivative, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
             st.markdown(variation_table)
             st.markdown("- y' 행: 함수의 증감. + (증가) / - (감소) / 0 (극값)  \n- y'' 행: 함수의 볼록성. + (아래로 볼록) / - (위로 볼록) / 0 (변곡점)  \n- y 행: 함수의 개형. ↗ (증가) / ↘ (감소) / 극소/극대/변곡점 표시")
 
