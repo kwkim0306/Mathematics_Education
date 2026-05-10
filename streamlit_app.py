@@ -82,16 +82,16 @@ if expr_input:
 
                     if extremum_xs:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
-                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="극점")
+                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="Extremum")
                         for x0, y0 in zip(extremum_xs, y_ext):
-                            ax.annotate("극점", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
-                                        color="red", fontsize=10, fontfamily="serif")
+                            ax.annotate("E", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
+                                        color="red", fontsize=10, fontfamily="sans-serif")
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
-                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="변곡점")
+                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="Inflection")
                         for x0, y0 in zip(inflection_xs, y_inf):
-                            ax.annotate("변곡점", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
-                                        color="green", fontsize=10, fontfamily="serif")
+                            ax.annotate("I", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
+                                        color="green", fontsize=10, fontfamily="sans-serif")
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
