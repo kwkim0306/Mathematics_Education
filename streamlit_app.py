@@ -88,28 +88,34 @@ if expr_input:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
                         ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="극점")
                         special_points.extend([
-                            {"x": x0, "y": y0, "label": "극점", "color": "red", "offset": (6, 6)}
+                            {"x": x0, "y": y0, "label": "극점", "color": "red", "base_offset": (8, 12)}
                             for x0, y0 in zip(extremum_xs, y_ext)
                         ])
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
                         ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="변곡점")
                         special_points.extend([
-                            {"x": x0, "y": y0, "label": "변곡점", "color": "green", "offset": (6, -12)}
+                            {"x": x0, "y": y0, "label": "변곡점", "color": "green", "base_offset": (8, -18)}
                             for x0, y0 in zip(inflection_xs, y_inf)
                         ])
                     special_points.sort(key=lambda p: (p["x"], p["y"]))
-                    for i, point in enumerate(special_points):
-                        offset_x, offset_y = point["offset"]
-                        for prev in special_points[:i]:
-                            if abs(point["x"] - prev["x"]) < 0.3 and abs(point["y"] - prev["y"]) < 0.3:
+                    used_positions = []
+                    for point in special_points:
+                        offset_x, offset_y = point["base_offset"]
+                        for prev in used_positions:
+                            if abs(point["x"] - prev["x"]) < 0.25 and abs(point["y"] - prev["y"]) < 0.25:
                                 if point["label"] == prev["label"]:
-                                    offset_y += 15
+                                    offset_x += 14 if point["x"] >= prev["x"] else -14
+                                    offset_y += 16
                                 else:
-                                    offset_y += -15 if point["label"] == "변곡점" else 15
+                                    offset_y = 18 if point["label"] == "극점" else -24
+                                    offset_x += 10
+                        used_positions.append(point)
                         ax.annotate(point["label"], xy=(point["x"], point["y"]), xytext=(offset_x, offset_y),
                                     textcoords="offset points", color=point["color"], fontsize=10,
-                                    fontproperties=font_prop, arrowprops=dict(arrowstyle="-", color=point["color"]))
+                                    fontproperties=font_prop,
+                                    bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.7),
+                                    arrowprops=dict(arrowstyle="-", color=point["color"]))
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
