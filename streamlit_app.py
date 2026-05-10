@@ -319,14 +319,64 @@ if expr_input:
 
             st.pyplot(fig)
 
-            if show_special_points:
-                st.write("### 도함수 정보")
-                st.latex(r"f'(x) = " + sp.latex(derivative))
-                st.latex(r"f''(x) = " + sp.latex(second_derivative))
+            domain = get_domain(expr, x)
+            value_range = get_range(expr, x, domain)
+            symmetry = get_symmetry(expr, x)
+            period = get_period(expr, x)
+            try:
+                x_intercepts = sp.solveset(sp.simplify(expr), x, domain=domain)
+                if x_intercepts.is_FiniteSet:
+                    x_intercepts = [sp.nsimplify(pt, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for pt in x_intercepts]
+                else:
+                    x_intercepts = []
+            except Exception:
+                x_intercepts = []
+            try:
+                y_intercept = expr.subs(x, 0)
+            except Exception:
+                y_intercept = None
+            derivative_fn = sp.lambdify(x, derivative, modules=["numpy"])
+            second_derivative_fn = sp.lambdify(x, second_derivative, modules=["numpy"])
+            derivative_chart = make_sign_chart(derivative_fn, extremum_xs, x_min, x_max)
+            convexity_chart = make_sign_chart(second_derivative_fn, inflection_xs, x_min, x_max)
+            horiz_asymptotes, vert_asymptotes = get_asymptotes(expr, x)
 
             st.write("---")
             st.write("### 상세 정보")
-            st.write(f"- 계산된 유효 점 개수: {np.count_nonzero(mask)} / {num_points}")
+            st.markdown(f"**1. 정의역과 치역**  \n- 정의역: {format_interval(domain)}  \n- 치역: {format_interval(value_range)}")
+            x_int_text = ", ".join([r"$%s$" % sp.latex(pt) for pt in x_intercepts]) if x_intercepts else "없음"
+            y_int_text = r"$%s$" % sp.latex(y_intercept) if y_intercept is not None else "없음"
+            st.markdown(f"**2. 곡선과 좌표축의 교점**  \n- x절편: {x_int_text}  \n- y절편: {y_int_text}")
+            period_text = r"$%s$" % sp.latex(period) if period is not None else "없음"
+            st.markdown(f"**3. 곡선의 대칭성과 주기**  \n- 대칭성: {symmetry}  \n- 주기: {period_text}")
+
+            st.write("**4. 함수의 증가/감소, 극대와 극소 (증감표)**")
+            st.markdown("| 구간 | 상태 |  \n| --- | --- |")
+            for a, b, status in derivative_chart:
+                st.markdown(f"| ({a:.2f}, {b:.2f}) | {status} |  ")
+            if extremum_xs:
+                extremum_text = ", ".join([r"$%s$" % sp.latex(x0) for x0 in extremum_xs])
+                st.markdown(f"- 극값 위치: {extremum_text}")
+
+            st.write("**5. 곡선의 볼록성, 변곡점 (증감표)**")
+            st.markdown("| 구간 | 상태 |  \n| --- | --- |")
+            for a, b, status in convexity_chart:
+                state = "볼록" if status == "증가" else "오목" if status == "감소" else "불명"
+                st.markdown(f"| ({a:.2f}, {b:.2f}) | {state} |  ")
+            if inflection_xs:
+                inflection_text = ", ".join([r"$%s$" % sp.latex(x0) for x0 in inflection_xs])
+                st.markdown(f"- 변곡점 위치: {inflection_text}")
+
+            st.write("**6. 극한과 접선**")
+            st.markdown(f"- 우극한: $%s$  \n- 좌극한: $%s$" % (sp.latex(sp.limit(expr, x, sp.oo)), sp.latex(sp.limit(expr, x, -sp.oo))))
+            if horiz_asymptotes:
+                st.markdown(f"- 수평점근선: %s" % ", ".join([r"$y=%s$" % sp.latex(h) for h in horiz_asymptotes]))
+            else:
+                st.markdown("- 수평점근선: 없음")
+            if vert_asymptotes:
+                st.markdown(f"- 수직점근선: %s" % ", ".join([r"$x=%s$" % sp.latex(v) for v in vert_asymptotes]))
+            else:
+                st.markdown("- 수직점근선: 없음")
     except SympifyError:
         st.error("입력한 함수식이 잘못되었습니다. 올바른 일변수 함수식을 입력해 주세요.")
     except Exception as exc:
