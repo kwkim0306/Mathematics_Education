@@ -12,7 +12,6 @@ st.write("함수식을 입력하면 해당 함수의 그래프를 그려줍니�
 with st.sidebar:
     st.header("설정")
     num_points = st.slider("표시할 점 개수", min_value=100, max_value=2000, value=500, step=100)
-    show_expression = st.checkbox("입력식 표시", value=True)
 
 expr_input = st.text_input("함수식 f(x)", value="sin(x)")
 
@@ -29,10 +28,6 @@ if expr_input:
         func = sp.lambdify(x, expr, modules=["numpy"])
         xs = np.linspace(x_min, x_max, num_points)
         ys = func(xs)
-
-        if show_expression:
-            st.markdown(f"**입력식:** `{expr_input}`")
-            st.markdown(f"**변환된 식:** `{str(expr)}`")
 
         mask = np.isfinite(ys)
         if np.count_nonzero(mask) == 0:
