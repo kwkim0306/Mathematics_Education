@@ -134,9 +134,9 @@ def classify_extremum(second_derivative, x, point):
 def get_symmetry(expr, x):
     try:
         if sp.simplify(expr.subs(x, -x) - expr) == 0:
-            return "짝함수"
+            return "y축에 대하여 대칭"
         if sp.simplify(expr.subs(x, -x) + expr) == 0:
-            return "홀함수"
+            return "원점에 대하여 대칭"
     except Exception:
         pass
     return "대칭 없음"
