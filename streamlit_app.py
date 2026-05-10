@@ -26,6 +26,18 @@ def find_zero_crossings(x_values, y_values):
     return [float(np.round(r, 4)) for r in filtered]
 
 
+def format_as_radical(value):
+    try:
+        exact = sp.nsimplify(float(value), [sp.sqrt(2), sp.sqrt(3), sp.sqrt(5), sp.sqrt(6), sp.sqrt(7), sp.sqrt(10), sp.sqrt(11), sp.sqrt(13)])
+        if abs(float(exact) - float(value)) < 1e-8:
+            return r"$%s$" % sp.latex(exact)
+    except Exception:
+        pass
+    if abs(float(value) - round(float(value))) < 1e-8:
+        return str(int(round(float(value))))
+    return f"{float(value):.2f}"
+
+
 base_dir = Path(__file__).resolve().parent
 font_path = base_dir / "fonts" / "NotoSansKR-Regular.ttf"
 fm.fontManager.addfont(str(font_path))
@@ -87,26 +99,26 @@ if expr_input:
 
                     if extremum_xs:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
-                        ax.scatter(extremum_xs, y_ext, color="red", s=80, zorder=4, label="극점", edgecolors="black")
+                        ax.scatter(extremum_xs, y_ext, color="red", s=20, zorder=4, label="극점", edgecolors="black")
                         if show_axis_x:
-                            ax.scatter(extremum_xs, np.zeros_like(extremum_xs), color="red", s=40, zorder=4, alpha=0.8)
+                            ax.scatter(extremum_xs, np.zeros_like(extremum_xs), color="red", s=10, zorder=4, alpha=0.8)
                             for x0 in extremum_xs:
-                                ax.text(x0, 0, f"{x0:.2f}", color="red", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(x0, 0, format_as_radical(x0), color="red", fontsize=8, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
-                            ax.scatter(np.zeros_like(y_ext), y_ext, color="red", s=40, zorder=4, alpha=0.8)
+                            ax.scatter(np.zeros_like(y_ext), y_ext, color="red", s=10, zorder=4, alpha=0.8)
                             for y0 in y_ext:
-                                ax.text(0, y0, f"{y0:.2f}", color="red", fontsize=8, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(0, y0, format_as_radical(y0), color="red", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
-                        ax.scatter(inflection_xs, y_inf, color="green", s=80, zorder=4, label="변곡점", edgecolors="black")
+                        ax.scatter(inflection_xs, y_inf, color="green", s=20, zorder=4, label="변곡점", edgecolors="black")
                         if show_axis_x:
-                            ax.scatter(inflection_xs, np.zeros_like(inflection_xs), color="green", s=40, zorder=4, alpha=0.8)
+                            ax.scatter(inflection_xs, np.zeros_like(inflection_xs), color="green", s=10, zorder=4, alpha=0.8)
                             for x0 in inflection_xs:
-                                ax.text(x0, 0, f"{x0:.2f}", color="green", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(x0, 0, format_as_radical(x0), color="green", fontsize=8, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
-                            ax.scatter(np.zeros_like(y_inf), y_inf, color="green", s=40, zorder=4, alpha=0.8)
+                            ax.scatter(np.zeros_like(y_inf), y_inf, color="green", s=10, zorder=4, alpha=0.8)
                             for y0 in y_inf:
-                                ax.text(0, y0, f"{y0:.2f}", color="green", fontsize=8, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(0, y0, format_as_radical(y0), color="green", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
