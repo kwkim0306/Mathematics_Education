@@ -4,6 +4,7 @@ import numpy as np
 import sympy as sp
 import streamlit as st
 from sympy import SympifyError
+from pathlib import Path
 
 
 def find_zero_crossings(x_values, y_values):
@@ -25,11 +26,12 @@ def find_zero_crossings(x_values, y_values):
     return [float(np.round(r, 4)) for r in filtered]
 
 
-font_path = "/workspaces/Mathematics_Education/NotoSansKR-Regular.otf"
-fm.fontManager.addfont(font_path)
+base_dir = Path(__file__).resolve().parent
+font_path = base_dir / "fonts" / "NotoSansKR-Regular.ttf"
+fm.fontManager.addfont(str(font_path))
 plt.rcParams.update({
     "font.family": "sans-serif",
-    "font.sans-serif": [font_path, "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
+    "font.sans-serif": [str(font_path), "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
     "font.weight": "normal",
     "text.usetex": False
 })
