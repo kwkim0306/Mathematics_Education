@@ -4,6 +4,26 @@ import sympy as sp
 import streamlit as st
 from sympy import SympifyError
 
+
+def find_zero_crossings(x_values, y_values):
+    roots = []
+    for i in range(len(y_values) - 1):
+        y1, y2 = y_values[i], y_values[i + 1]
+        if not np.isfinite(y1) or not np.isfinite(y2):
+            continue
+        if y1 == 0:
+            roots.append(x_values[i])
+        elif y1 * y2 < 0:
+            root = x_values[i] - y1 * (x_values[i + 1] - x_values[i]) / (y2 - y1)
+            roots.append(root)
+
+    filtered = []
+    for r in roots:
+        if not any(abs(r - existing) < 1e-3 for existing in filtered):
+            filtered.append(r)
+    return [float(np.round(r, 4)) for r in filtered]
+
+
 plt.rcParams.update({
     "font.family": "serif",
     "font.serif": ["DejaVu Serif", "Times New Roman", "Georgia"],
@@ -21,6 +41,7 @@ st.title("📈 일변수 함수 그래프 그리기")
 num_points = 500
 
 expr_input = st.text_input("함수식 f(x)", value="sin(x)")
+show_special_points = st.checkbox("극점/변곡점 표시", value=False)
 
 x_min = -10.0
 x_max = 10.0
@@ -63,7 +84,29 @@ if expr_input:
             st.write("---")
             st.write("### 상세 정보")
             st.write(f"- 계산된 유효 점 개수: {np.count_nonzero(mask)} / {num_points}")
+            if show_special_points:
+                try:
+                    derivative = sp.diff(expr, x)
+                    second_derivative = sp.diff(expr, x, 2)
+                    dfunc = sp.lambdify(x, derivative, modules=["numpy"])
+                    dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
+                    d_vals = dfunc(xs)
+                    dd_vals = dd_func(xs)
 
+                    extremum_xs = find_zero_crossings(xs, d_vals)
+                    inflection_xs = find_zero_crossings(xs, dd_vals)
+
+                    if extremum_xs:
+                        st.write(f"- 극점 x 좌표: {', '.join(map(str, extremum_xs))}")
+                    else:
+                        st.write("- 극점 x 좌표: 없음")
+
+                    if inflection_xs:
+                        st.write(f"- 변곡점 x 좌표: {', '.join(map(str, inflection_xs))}")
+                    else:
+                        st.write("- 변곡점 x 좌표: 없음")
+                except Exception:
+                    st.write("- 극점/변곡점 계산 중 오류가 발생했습니다.")
     except SympifyError:
         st.error("입력한 함수식이 잘못되었습니다. 올바른 일변수 함수식을 입력해 주세요.")
     except Exception as exc:
