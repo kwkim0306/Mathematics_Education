@@ -29,9 +29,11 @@ def find_zero_crossings(x_values, y_values):
 base_dir = Path(__file__).resolve().parent
 font_path = base_dir / "fonts" / "NotoSansKR-Regular.ttf"
 fm.fontManager.addfont(str(font_path))
+font_prop = fm.FontProperties(fname=str(font_path))
+font_name = font_prop.get_name()
 plt.rcParams.update({
-    "font.family": "sans-serif",
-    "font.sans-serif": [str(font_path), "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
+    "font.family": font_name,
+    "font.sans-serif": [font_name, "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
     "font.weight": "normal",
     "text.usetex": False
 })
@@ -86,13 +88,13 @@ if expr_input:
                         ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="극점")
                         for x0, y0 in zip(extremum_xs, y_ext):
                             ax.annotate("극점", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
-                                        color="red", fontsize=10, fontfamily="sans-serif")
+                                        color="red", fontsize=10, fontproperties=font_prop)
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
                         ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="변곡점")
                         for x0, y0 in zip(inflection_xs, y_inf):
                             ax.annotate("변곡점", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
-                                        color="green", fontsize=10, fontfamily="sans-serif")
+                                        color="green", fontsize=10, fontproperties=font_prop)
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
