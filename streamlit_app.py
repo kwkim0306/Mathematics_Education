@@ -83,50 +83,12 @@ if expr_input:
                     extremum_xs = find_zero_crossings(xs, d_vals)
                     inflection_xs = find_zero_crossings(xs, dd_vals)
 
-                    special_points = []
                     if extremum_xs:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
-                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=3, label="극점", edgecolors="black")
-                        special_points.extend([
-                            {"x": x0, "y": y0, "label": "극점", "color": "red", "base_offset": (18, 20)}
-                            for x0, y0 in zip(extremum_xs, y_ext)
-                        ])
+                        ax.scatter(extremum_xs, y_ext, color="red", s=80, zorder=4, label="극점", edgecolors="black")
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
-                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=3, label="변곡점", edgecolors="black")
-                        special_points.extend([
-                            {"x": x0, "y": y0, "label": "변곡점", "color": "green", "base_offset": (18, -26)}
-                            for x0, y0 in zip(inflection_xs, y_inf)
-                        ])
-                    special_points.sort(key=lambda p: (p["x"], p["y"]))
-                    drawn_bboxes = []
-                    fig.canvas.draw()
-                    renderer = fig.canvas.get_renderer()
-                    for point in special_points:
-                        offset_x, offset_y = point["base_offset"]
-                        ha = "left" if offset_x >= 0 else "right"
-                        va = "bottom" if offset_y >= 0 else "top"
-                        ann = ax.annotate(point["label"], xy=(point["x"], point["y"]), xytext=(offset_x, offset_y),
-                                          textcoords="offset points", color=point["color"], fontsize=10,
-                                          fontproperties=font_prop, zorder=20,
-                                          ha=ha, va=va,
-                                          bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.9),
-                                          arrowprops=dict(arrowstyle="-", color=point["color"], lw=1))
-                        fig.canvas.draw()
-                        bbox = ann.get_window_extent(renderer=renderer)
-                        step = 0
-                        while any(bbox.overlaps(prev) for prev in drawn_bboxes) and step < 5:
-                            step += 1
-                            offset_x += 18 if offset_x >= 0 else -18
-                            offset_y += 20 if offset_y >= 0 else -20
-                            ann.set_position((offset_x, offset_y))
-                            ha = "left" if offset_x >= 0 else "right"
-                            va = "bottom" if offset_y >= 0 else "top"
-                            ann.set_ha(ha)
-                            ann.set_va(va)
-                            fig.canvas.draw()
-                            bbox = ann.get_window_extent(renderer=renderer)
-                        drawn_bboxes.append(bbox)
+                        ax.scatter(inflection_xs, y_inf, color="green", s=80, zorder=4, label="변곡점", edgecolors="black")
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
