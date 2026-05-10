@@ -7,11 +7,8 @@ from sympy import SympifyError
 st.set_page_config(page_title="일변수 함수 그래프", layout="wide")
 
 st.title("📈 일변수 함수 그래프 그리기")
-st.write("함수식을 입력하면 해당 함수의 그래프를 그려줍니다. 예: `x**2`, `sin(x)`, `exp(-x)`, `log(x+1)`")
 
-with st.sidebar:
-    st.header("설정")
-    num_points = st.slider("표시할 점 개수", min_value=100, max_value=2000, value=500, step=100)
+num_points = 500
 
 expr_input = st.text_input("함수식 f(x)", value="sin(x)")
 
