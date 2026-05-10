@@ -3,8 +3,11 @@ import matplotlib.font_manager as fm
 import numpy as np
 import sympy as sp
 import streamlit as st
-from sympy import SympifyError
 from pathlib import Path
+from sympy import SympifyError
+from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application
+
+NUM_POINTS = 500
 
 
 def find_zero_crossings(x_values, y_values):
@@ -74,11 +77,57 @@ def find_symbolic_roots(eq, x, lower, upper):
     return []
 
 
+transformations = standard_transformations + (implicit_multiplication_application,)
+
+sympy_locals = {
+    "x": sp.symbols("x"),
+    "sin": sp.sin,
+    "cos": sp.cos,
+    "tan": sp.tan,
+    "exp": sp.exp,
+    "log": sp.log,
+    "sqrt": sp.sqrt,
+    "abs": sp.Abs,
+    "pi": sp.pi,
+    "E": sp.E,
+}
+
+
+@st.cache_data
+def analyze_expression(expr_input, x_min, x_max):
+    x = sympy_locals["x"]
+    expr = parse_expr(expr_input, transformations=transformations, local_dict=sympy_locals)
+    derivative = sp.diff(expr, x)
+    second_derivative = sp.diff(expr, x, 2)
+
+    sample_xs = np.linspace(x_min, x_max, NUM_POINTS)
+    extremum_xs = find_symbolic_roots(derivative, x, x_min, x_max)
+    if not extremum_xs:
+        dfunc = sp.lambdify(x, derivative, modules=["numpy"])
+        extremum_xs = find_zero_crossings(sample_xs, dfunc(sample_xs))
+        extremum_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in extremum_xs]
+
+    inflection_xs = find_symbolic_roots(second_derivative, x, x_min, x_max)
+    if not inflection_xs:
+        dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
+        inflection_xs = find_zero_crossings(sample_xs, dd_func(sample_xs))
+        inflection_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in inflection_xs]
+
+    return expr, derivative, second_derivative, extremum_xs, inflection_xs
+
+
 base_dir = Path(__file__).resolve().parent
 font_path = base_dir / "fonts" / "NotoSansKR-Regular.ttf"
-fm.fontManager.addfont(str(font_path))
-font_prop = fm.FontProperties(fname=str(font_path))
-font_name = font_prop.get_name()
+font_prop = fm.FontProperties()
+font_name = "DejaVu Sans"
+if font_path.exists():
+    try:
+        fm.fontManager.addfont(str(font_path))
+        font_prop = fm.FontProperties(fname=str(font_path))
+        font_name = font_prop.get_name()
+    except Exception:
+        font_prop = fm.FontProperties()
+        font_name = "DejaVu Sans"
 plt.rcParams.update({
     "font.family": font_name,
     "font.sans-serif": [font_name, "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
@@ -102,11 +151,8 @@ x_max = 10.0
 
 if expr_input:
     try:
-        x = sp.symbols("x")
-        expr = sp.sympify(expr_input, locals={"x": x, "sin": sp.sin, "cos": sp.cos, "tan": sp.tan,
-                                              "exp": sp.exp, "log": sp.log, "sqrt": sp.sqrt, "abs": sp.Abs,
-                                              "pi": sp.pi, "E": sp.E})
-
+        expr, derivative, second_derivative, extremum_xs, inflection_xs = analyze_expression(expr_input, x_min, x_max)
+        x = sympy_locals["x"]
         func = sp.lambdify(x, expr, modules=["numpy"])
         xs = np.linspace(x_min, x_max, num_points)
         ys = func(xs)
@@ -123,20 +169,9 @@ if expr_input:
 
             if show_special_points:
                 try:
-                    derivative = sp.diff(expr, x)
-                    second_derivative = sp.diff(expr, x, 2)
-
-                    extremum_xs = find_symbolic_roots(derivative, x, x_min, x_max)
-                    inflection_xs = find_symbolic_roots(second_derivative, x, x_min, x_max)
-
-                    if not extremum_xs:
-                        dfunc = sp.lambdify(x, derivative, modules=["numpy"])
-                        extremum_xs = find_zero_crossings(xs, dfunc(xs))
-                        extremum_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in extremum_xs]
-                    if not inflection_xs:
-                        dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
-                        inflection_xs = find_zero_crossings(xs, dd_func(xs))
-                        inflection_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in inflection_xs]
+                    st.write("### 도함수 정보")
+                    st.latex(r"f'(x) = " + sp.latex(derivative))
+                    st.latex(r"f''(x) = " + sp.latex(second_derivative))
 
                     if extremum_xs:
                         y_ext = []
