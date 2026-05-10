@@ -441,18 +441,12 @@ if expr_input:
             period_text = r"$%s$" % sp.latex(period) if period is not None else "없음"
             st.markdown(f"**3. 곡선의 대칭성과 주기**  \n- 대칭성: {symmetry}  \n- 주기: {period_text}")
 
-            st.write("**4. 함수의 증가/감소, 극대와 극소 (증감표)**")
+            st.write("**4. 함수의 증가/감소, 극대와 극소, 곡선의 볼록성과 변곡점 (증감표)**")
             variation_table = build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
             st.markdown(variation_table)
+            st.markdown("- y' 행: 함수의 증감. + (증가) / - (감소) / 0 (극값)  \n- y'' 행: 함수의 볼록성. + (아래로 볼록) / - (위로 볼록) / 0 (변곡점)  \n- y 행: 함수의 개형. ↗ (증가) / ↘ (감소) / 극소/극대/변곡점 표시")
 
-            st.write("**5. 곡선의 볼록성, 변곡점 (증감표)**")
-            st.markdown("(y 행의 변곡점은 y''가 0이 되는 위치를 표시합니다.)")
-            st.markdown(variation_table)
-            if inflection_xs:
-                inflection_text = ", ".join([r"$%s$" % sp.latex(x0) for x0 in inflection_xs])
-                st.markdown(f"- 변곡점 위치: {inflection_text}")
-
-            st.write("**6. 극한과 접선**")
+            st.write("**5. 극한과 점근선**")
             st.markdown(f"- 우극한: $%s$  \n- 좌극한: $%s$" % (sp.latex(sp.limit(expr, x, sp.oo)), sp.latex(sp.limit(expr, x, -sp.oo))))
             if horiz_asymptotes:
                 st.markdown(f"- 수평점근선: %s" % ", ".join([r"$y=%s$" % sp.latex(h) for h in horiz_asymptotes]))
