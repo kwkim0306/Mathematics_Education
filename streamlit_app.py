@@ -236,9 +236,6 @@ def build_variation_table(expr, x, derivative, second_derivative, derivative_fn,
     y1_cells = []
     y2_cells = []
     y_cells = []
-    y_values = []
-
-    expr_fn = sp.lambdify(x, expr, modules=["numpy"])
 
     def sample_value(fn, low, high):
         if low == -np.inf and high == np.inf:
@@ -261,10 +258,8 @@ def build_variation_table(expr, x, derivative, second_derivative, derivative_fn,
         low, high = values[i], values[i + 1]
         y1_mid = sample_value(derivative_fn, low, high)
         y2_mid = sample_value(second_derivative_fn, low, high)
-        y_mid = sample_value(expr_fn, low, high)
         y1_cells.append(sign_symbol(y1_mid) if y1_mid is not None else "?")
         y2_cells.append(sign_symbol(y2_mid) if y2_mid is not None else "?")
-        y_values.append(format_value(y_mid) if y_mid is not None else "?")
         if y1_mid is None:
             y_cells.append("?")
         elif y1_mid > 0:
@@ -277,10 +272,8 @@ def build_variation_table(expr, x, derivative, second_derivative, derivative_fn,
             point = critical_points[i]
             y1_point = sign_symbol(derivative_fn(point))
             y2_point = sign_symbol(second_derivative_fn(point))
-            y_point = expr.subs(x, point)
             y1_cells.append("0" if abs(derivative_fn(point)) < 1e-6 else y1_point)
             y2_cells.append("0" if abs(second_derivative_fn(point)) < 1e-6 else y2_point)
-            y_values.append(format_value(y_point))
             y_cells.append(format_point_label(point, extremum_xs, inflection_xs, second_derivative, expr, x))
 
     table_lines = []
@@ -289,7 +282,6 @@ def build_variation_table(expr, x, derivative, second_derivative, derivative_fn,
     table_lines.append("| y' | " + " | ".join(y1_cells) + " |")
     table_lines.append("| y'' | " + " | ".join(y2_cells) + " |")
     table_lines.append("| y | " + " | ".join(y_cells) + " |")
-    table_lines.append("| f(x) | " + " | ".join(y_values) + " |")
     return "\n".join(table_lines)
 
 
