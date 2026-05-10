@@ -5,6 +5,7 @@ import sympy as sp
 import streamlit as st
 from pathlib import Path
 from sympy import SympifyError
+from sympy.calculus.util import continuous_domain, function_range
 from sympy.parsing.sympy_parser import parse_expr, standard_transformations, implicit_multiplication_application, convert_xor
 
 NUM_POINTS = 500
@@ -75,6 +76,102 @@ def find_symbolic_roots(eq, x, lower, upper):
     except Exception:
         pass
     return []
+
+
+def get_domain(expr, x):
+    try:
+        return continuous_domain(expr, x, sp.S.Reals)
+    except Exception:
+        return sp.S.Reals
+
+
+def get_range(expr, x, dom):
+    try:
+        return function_range(expr, x, dom)
+    except Exception:
+        return sp.S.Reals
+
+
+def format_interval(value):
+    if isinstance(value, (sp.Interval, sp.Union, sp.FiniteSet, sp.Reals)):
+        return r"$%s$" % sp.latex(value)
+    return str(value)
+
+
+def make_sign_chart(fn, critical_points, x_min, x_max):
+    pts = [x_min] + sorted([float(p) for p in critical_points if x_min < float(p) < x_max]) + [x_max]
+    intervals = []
+    for a, b in zip(pts[:-1], pts[1:]):
+        mid = (a + b) / 2
+        try:
+            val = fn(mid)
+            if not np.isfinite(val):
+                sign = "불명"
+            elif val > 0:
+                sign = "증가"
+            elif val < 0:
+                sign = "감소"
+            else:
+                sign = "정지"
+        except Exception:
+            sign = "불명"
+        intervals.append((a, b, sign))
+    return intervals
+
+
+def classify_extremum(second_derivative, x, point):
+    try:
+        sec_val = float(second_derivative.subs(x, point))
+        if sec_val > 0:
+            return "극소"
+        if sec_val < 0:
+            return "극대"
+    except Exception:
+        pass
+    return "판별 불가"
+
+
+def get_symmetry(expr, x):
+    try:
+        if sp.simplify(expr.subs(x, -x) - expr) == 0:
+            return "짝함수"
+        if sp.simplify(expr.subs(x, -x) + expr) == 0:
+            return "홀함수"
+    except Exception:
+        pass
+    return "대칭 없음"
+
+
+def get_period(expr, x):
+    try:
+        period = sp.periodicity(expr, x)
+        if period is not None:
+            return period
+    except Exception:
+        pass
+    return None
+
+
+def get_asymptotes(expr, x):
+    horizontals = []
+    verticals = []
+    try:
+        lim_plus = sp.limit(expr, x, sp.oo)
+        lim_minus = sp.limit(expr, x, -sp.oo)
+        if lim_plus.is_real:
+            horizontals.append(lim_plus)
+        if lim_minus.is_real and lim_minus != lim_plus:
+            horizontals.append(lim_minus)
+    except Exception:
+        pass
+    try:
+        poles = sp.singularities(expr, x)
+        for pole in poles:
+            if pole.is_real:
+                verticals.append(pole)
+    except Exception:
+        pass
+    return horizontals, verticals
 
 
 transformations = standard_transformations + (implicit_multiplication_application, convert_xor)
