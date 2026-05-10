@@ -26,16 +26,52 @@ def find_zero_crossings(x_values, y_values):
     return [float(np.round(r, 4)) for r in filtered]
 
 
-def format_as_radical(value):
+def simplify_value(value):
+    if isinstance(value, sp.Expr):
+        try:
+            simplified = sp.simplify(value)
+            return simplified
+        except Exception:
+            return value
+
     try:
-        exact = sp.nsimplify(float(value), [sp.sqrt(2), sp.sqrt(3), sp.sqrt(5), sp.sqrt(6), sp.sqrt(7), sp.sqrt(10), sp.sqrt(11), sp.sqrt(13)])
-        if abs(float(exact) - float(value)) < 1e-8:
+        return sp.nsimplify(value, [sp.pi, sp.E,
+                                    sp.sqrt(2), sp.sqrt(3), sp.sqrt(5), sp.sqrt(6), sp.sqrt(7), sp.sqrt(10),
+                                    sp.sqrt(11), sp.sqrt(13), sp.sqrt(17), sp.sqrt(19)])
+    except Exception:
+        return value
+
+
+def format_value(value):
+    exact = simplify_value(value)
+    if isinstance(exact, sp.Expr) and exact.is_real:
+        try:
             return r"$%s$" % sp.latex(exact)
+        except Exception:
+            pass
+    try:
+        float_val = float(exact)
+        if abs(float_val - round(float_val)) < 1e-8:
+            return str(int(round(float_val)))
     except Exception:
         pass
-    if abs(float(value) - round(float(value))) < 1e-8:
-        return str(int(round(float(value))))
-    return f"{float(value):.2f}"
+    if isinstance(value, float):
+        return f"{value:.2f}"
+    return str(value)
+
+
+def find_symbolic_roots(eq, x, lower, upper):
+    try:
+        sol = sp.solveset(eq, x, domain=sp.Interval(lower, upper))
+        if sol.is_FiniteSet:
+            roots = []
+            for item in sol:
+                if item.is_real:
+                    roots.append(item)
+            return roots
+    except Exception:
+        pass
+    return []
 
 
 base_dir = Path(__file__).resolve().parent
@@ -89,36 +125,53 @@ if expr_input:
                 try:
                     derivative = sp.diff(expr, x)
                     second_derivative = sp.diff(expr, x, 2)
-                    dfunc = sp.lambdify(x, derivative, modules=["numpy"])
-                    dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
-                    d_vals = dfunc(xs)
-                    dd_vals = dd_func(xs)
 
-                    extremum_xs = find_zero_crossings(xs, d_vals)
-                    inflection_xs = find_zero_crossings(xs, dd_vals)
+                    extremum_xs = find_symbolic_roots(derivative, x, x_min, x_max)
+                    inflection_xs = find_symbolic_roots(second_derivative, x, x_min, x_max)
+
+                    if not extremum_xs:
+                        dfunc = sp.lambdify(x, derivative, modules=["numpy"])
+                        extremum_xs = find_zero_crossings(xs, dfunc(xs))
+                        extremum_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in extremum_xs]
+                    if not inflection_xs:
+                        dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
+                        inflection_xs = find_zero_crossings(xs, dd_func(xs))
+                        inflection_xs = [sp.nsimplify(x0, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)]) for x0 in inflection_xs]
 
                     if extremum_xs:
-                        y_ext = [float(func(x0)) for x0 in extremum_xs]
-                        ax.scatter(extremum_xs, y_ext, color="red", s=20, zorder=4, label="극점", edgecolors="black")
+                        y_ext = []
+                        for x0 in extremum_xs:
+                            try:
+                                y_ext.append(float(expr.subs(x, x0)))
+                            except Exception:
+                                y_ext.append(float(func(float(x0))))
+                        x_vals = [float(xx) for xx in extremum_xs]
+                        ax.scatter(x_vals, y_ext, color="red", s=20, zorder=4, label="극점", edgecolors="black")
                         if show_axis_x:
-                            ax.scatter(extremum_xs, np.zeros_like(extremum_xs), color="red", s=10, zorder=4, alpha=0.8)
+                            ax.scatter(x_vals, np.zeros_like(x_vals), color="red", s=10, zorder=4, alpha=0.8)
                             for x0 in extremum_xs:
-                                ax.text(x0, 0, format_as_radical(x0), color="red", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(float(x0), 0, format_value(x0), color="red", fontsize=8, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
                             ax.scatter(np.zeros_like(y_ext), y_ext, color="red", s=10, zorder=4, alpha=0.8)
                             for y0 in y_ext:
-                                ax.text(0, y0, format_as_radical(y0), color="red", fontsize=8, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(0, y0, format_value(y0), color="red", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if inflection_xs:
-                        y_inf = [float(func(x0)) for x0 in inflection_xs]
-                        ax.scatter(inflection_xs, y_inf, color="green", s=20, zorder=4, label="변곡점", edgecolors="black")
+                        y_inf = []
+                        for x0 in inflection_xs:
+                            try:
+                                y_inf.append(float(expr.subs(x, x0)))
+                            except Exception:
+                                y_inf.append(float(func(float(x0))))
+                        x_vals = [float(xx) for xx in inflection_xs]
+                        ax.scatter(x_vals, y_inf, color="green", s=20, zorder=4, label="변곡점", edgecolors="black")
                         if show_axis_x:
-                            ax.scatter(inflection_xs, np.zeros_like(inflection_xs), color="green", s=10, zorder=4, alpha=0.8)
+                            ax.scatter(x_vals, np.zeros_like(x_vals), color="green", s=10, zorder=4, alpha=0.8)
                             for x0 in inflection_xs:
-                                ax.text(x0, 0, format_as_radical(x0), color="green", fontsize=8, ha="center", va="top", fontproperties=font_prop)
+                                ax.text(float(x0), 0, format_value(x0), color="green", fontsize=8, ha="center", va="top", fontproperties=font_prop)
                         if show_axis_y:
                             ax.scatter(np.zeros_like(y_inf), y_inf, color="green", s=10, zorder=4, alpha=0.8)
                             for y0 in y_inf:
-                                ax.text(0, y0, format_as_radical(y0), color="green", fontsize=8, ha="left", va="center", fontproperties=font_prop)
+                                ax.text(0, y0, format_value(y0), color="green", fontsize=8, ha="left", va="center", fontproperties=font_prop)
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
                 except Exception:
