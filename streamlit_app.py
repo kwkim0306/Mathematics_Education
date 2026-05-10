@@ -67,6 +67,35 @@ if expr_input:
             ax.set_ylabel("f(x)", fontsize=12, fontfamily="serif")
             ax.set_title(f"f(x) = {expr_input}", fontdict={"fontsize": 18, "fontfamily": "serif", "fontweight": "light"})
 
+            if show_special_points:
+                try:
+                    derivative = sp.diff(expr, x)
+                    second_derivative = sp.diff(expr, x, 2)
+                    dfunc = sp.lambdify(x, derivative, modules=["numpy"])
+                    dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
+                    d_vals = dfunc(xs)
+                    dd_vals = dd_func(xs)
+
+                    extremum_xs = find_zero_crossings(xs, d_vals)
+                    inflection_xs = find_zero_crossings(xs, dd_vals)
+
+                    if extremum_xs:
+                        y_ext = [float(func(x0)) for x0 in extremum_xs]
+                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="극점")
+                        for x0, y0 in zip(extremum_xs, y_ext):
+                            ax.annotate("극점", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
+                                        color="red", fontsize=10, fontfamily="serif")
+                    if inflection_xs:
+                        y_inf = [float(func(x0)) for x0 in inflection_xs]
+                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="변곡점")
+                        for x0, y0 in zip(inflection_xs, y_inf):
+                            ax.annotate("변곡점", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
+                                        color="green", fontsize=10, fontfamily="serif")
+                    if extremum_xs or inflection_xs:
+                        ax.legend(loc="upper right", fontsize=10)
+                except Exception:
+                    st.warning("극점/변곡점 표시 중 오류가 발생했습니다.")
+
             ax.axhline(0, color="black", linewidth=1)
             ax.axvline(0, color="black", linewidth=1)
             ax.set_axisbelow(True)
@@ -84,29 +113,6 @@ if expr_input:
             st.write("---")
             st.write("### 상세 정보")
             st.write(f"- 계산된 유효 점 개수: {np.count_nonzero(mask)} / {num_points}")
-            if show_special_points:
-                try:
-                    derivative = sp.diff(expr, x)
-                    second_derivative = sp.diff(expr, x, 2)
-                    dfunc = sp.lambdify(x, derivative, modules=["numpy"])
-                    dd_func = sp.lambdify(x, second_derivative, modules=["numpy"])
-                    d_vals = dfunc(xs)
-                    dd_vals = dd_func(xs)
-
-                    extremum_xs = find_zero_crossings(xs, d_vals)
-                    inflection_xs = find_zero_crossings(xs, dd_vals)
-
-                    if extremum_xs:
-                        st.write(f"- 극점 x 좌표: {', '.join(map(str, extremum_xs))}")
-                    else:
-                        st.write("- 극점 x 좌표: 없음")
-
-                    if inflection_xs:
-                        st.write(f"- 변곡점 x 좌표: {', '.join(map(str, inflection_xs))}")
-                    else:
-                        st.write("- 변곡점 x 좌표: 없음")
-                except Exception:
-                    st.write("- 극점/변곡점 계산 중 오류가 발생했습니다.")
     except SympifyError:
         st.error("입력한 함수식이 잘못되었습니다. 올바른 일변수 함수식을 입력해 주세요.")
     except Exception as exc:
