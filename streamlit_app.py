@@ -146,6 +146,7 @@ if expr_input:
                             except Exception:
                                 y_ext.append(float(func(float(x0))))
                         x_vals = [float(xx) for xx in extremum_xs]
+                        ax.scatter(x_vals, y_ext, color="red", s=3, zorder=4, label="극점")
                         if show_axis_x:
                             ax.scatter(x_vals, np.full_like(x_vals, -0.1), color="red", s=2, zorder=4, alpha=0.8)
                             for x0 in extremum_xs:
@@ -162,6 +163,7 @@ if expr_input:
                             except Exception:
                                 y_inf.append(float(func(float(x0))))
                         x_vals = [float(xx) for xx in inflection_xs]
+                        ax.scatter(x_vals, y_inf, color="green", s=3, zorder=4, label="변곡점")
                         if show_axis_x:
                             ax.scatter(x_vals, np.full_like(x_vals, -0.1), color="green", s=2, zorder=4, alpha=0.8)
                             for x0 in inflection_xs:
