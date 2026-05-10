@@ -169,10 +169,6 @@ if expr_input:
 
             if show_special_points:
                 try:
-                    st.write("### 도함수 정보")
-                    st.latex(r"f'(x) = " + sp.latex(derivative))
-                    st.latex(r"f''(x) = " + sp.latex(second_derivative))
-
                     if extremum_xs:
                         y_ext = []
                         for x0 in extremum_xs:
@@ -225,6 +221,11 @@ if expr_input:
             ax.spines["left"].set_linewidth(1)
 
             st.pyplot(fig)
+
+            if show_special_points:
+                st.write("### 도함수 정보")
+                st.latex(r"f'(x) = " + sp.latex(derivative))
+                st.latex(r"f''(x) = " + sp.latex(second_derivative))
 
             st.write("---")
             st.write("### 상세 정보")
