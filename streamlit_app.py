@@ -174,6 +174,97 @@ def get_asymptotes(expr, x):
     return horizontals, verticals
 
 
+def sign_symbol(value):
+    try:
+        if value == 0:
+            return "0"
+        if value > 0:
+            return "+"
+        if value < 0:
+            return "-"
+    except Exception:
+        pass
+    return "?"
+
+
+def format_point_label(point, extremum_xs, inflection_xs, second_derivative, x):
+    if point in extremum_xs:
+        sec_val = None
+        try:
+            sec_val = float(second_derivative.subs(x, point))
+        except Exception:
+            pass
+        if sec_val is not None:
+            if sec_val > 0:
+                return "극소"
+            if sec_val < 0:
+                return "극대"
+        return "극값"
+    if point in inflection_xs:
+        return "변곡점"
+    return ""
+
+
+def build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max):
+    critical_points = sorted(set([float(p) for p in extremum_xs + inflection_xs if x_min < float(p) < x_max]))
+    values = [-np.inf] + critical_points + [np.inf]
+    headers = ["..."]
+    for point in critical_points:
+        headers.append(r"$%s$" % sp.latex(sp.nsimplify(point, [sp.pi, sp.E, sp.sqrt(2), sp.sqrt(3), sp.sqrt(5)])))
+        headers.append("...")
+
+    y1_cells = []
+    y2_cells = []
+    y_cells = []
+
+    def sample_value(fn, low, high):
+        if low == -np.inf and high == np.inf:
+            mid = 0.0
+        elif low == -np.inf:
+            mid = high - 1.0
+        elif high == np.inf:
+            mid = low + 1.0
+        else:
+            mid = (low + high) / 2.0
+        try:
+            value = fn(mid)
+            if not np.isfinite(value):
+                return None
+            return value
+        except Exception:
+            return None
+
+    for i in range(len(values) - 1):
+        low, high = values[i], values[i + 1]
+        y1_mid = sample_value(derivative_fn, low, high)
+        y2_mid = sample_value(second_derivative_fn, low, high)
+        y1_cells.append(sign_symbol(y1_mid) if y1_mid is not None else "?")
+        y2_cells.append(sign_symbol(y2_mid) if y2_mid is not None else "?")
+        if y1_mid is None:
+            y_cells.append("?")
+        elif y1_mid > 0:
+            y_cells.append("↗")
+        elif y1_mid < 0:
+            y_cells.append("↘")
+        else:
+            y_cells.append("→")
+        if i < len(critical_points):
+            point = critical_points[i]
+            y1_point = sign_symbol(derivative_fn(point))
+            y2_point = sign_symbol(second_derivative_fn(point))
+            y1_cells.append("0" if abs(derivative_fn(point)) < 1e-6 else y1_point)
+            y2_cells.append("0" if abs(second_derivative_fn(point)) < 1e-6 else y2_point)
+            y_cells.append(format_point_label(point, extremum_xs, inflection_xs, second_derivative, x))
+
+    table_lines = []
+    table_lines.append("| x | " + " | ".join(headers) + " |")
+    table_lines.append("| --- " + " | ---" * len(headers) + " |")
+    table_lines.append("| y' | " + " | ".join(y1_cells) + " |")
+    table_lines.append("| y'' | " + " | ".join(y2_cells) + " |")
+    table_lines.append("| y | " + " | ".join(y_cells) + " |")
+    return "\n".join(table_lines)
+
+
 transformations = standard_transformations + (implicit_multiplication_application, convert_xor)
 
 sympy_locals = {
@@ -351,18 +442,12 @@ if expr_input:
             st.markdown(f"**3. 곡선의 대칭성과 주기**  \n- 대칭성: {symmetry}  \n- 주기: {period_text}")
 
             st.write("**4. 함수의 증가/감소, 극대와 극소 (증감표)**")
-            st.markdown("| 구간 | 상태 |  \n| --- | --- |")
-            for a, b, status in derivative_chart:
-                st.markdown(f"| ({a:.2f}, {b:.2f}) | {status} |  ")
-            if extremum_xs:
-                extremum_text = ", ".join([r"$%s$" % sp.latex(x0) for x0 in extremum_xs])
-                st.markdown(f"- 극값 위치: {extremum_text}")
+            variation_table = build_variation_table(expr, x, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
+            st.markdown(variation_table)
 
             st.write("**5. 곡선의 볼록성, 변곡점 (증감표)**")
-            st.markdown("| 구간 | 상태 |  \n| --- | --- |")
-            for a, b, status in convexity_chart:
-                state = "볼록" if status == "증가" else "오목" if status == "감소" else "불명"
-                st.markdown(f"| ({a:.2f}, {b:.2f}) | {state} |  ")
+            st.markdown("(y 행의 변곡점은 y''가 0이 되는 위치를 표시합니다.)")
+            st.markdown(variation_table)
             if inflection_xs:
                 inflection_text = ", ".join([r"$%s$" % sp.latex(x0) for x0 in inflection_xs])
                 st.markdown(f"- 변곡점 위치: {inflection_text}")
