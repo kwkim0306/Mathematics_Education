@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
 import numpy as np
 import sympy as sp
 import streamlit as st
@@ -24,14 +25,12 @@ def find_zero_crossings(x_values, y_values):
     return [float(np.round(r, 4)) for r in filtered]
 
 
+font_path = "/workspaces/Mathematics_Education/NotoSansKR-Regular.otf"
+fm.fontManager.addfont(font_path)
 plt.rcParams.update({
     "font.family": "sans-serif",
-    "font.sans-serif": ["DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
+    "font.sans-serif": [font_path, "DejaVu Sans", "Arial", "Liberation Sans", "Nimbus Sans L"],
     "font.weight": "normal",
-    "mathtext.fontset": "dejavusans",
-    "mathtext.rm": "dejavusans",
-    "mathtext.it": "dejavusans:italic",
-    "mathtext.bf": "dejavusans:bold",
     "text.usetex": False
 })
 
@@ -82,15 +81,15 @@ if expr_input:
 
                     if extremum_xs:
                         y_ext = [float(func(x0)) for x0 in extremum_xs]
-                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="Extremum")
+                        ax.scatter(extremum_xs, y_ext, color="red", s=50, zorder=5, label="극점")
                         for x0, y0 in zip(extremum_xs, y_ext):
-                            ax.annotate("E", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
+                            ax.annotate("극점", xy=(x0, y0), xytext=(6, 6), textcoords="offset points",
                                         color="red", fontsize=10, fontfamily="sans-serif")
                     if inflection_xs:
                         y_inf = [float(func(x0)) for x0 in inflection_xs]
-                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="Inflection")
+                        ax.scatter(inflection_xs, y_inf, color="green", s=50, zorder=5, label="변곡점")
                         for x0, y0 in zip(inflection_xs, y_inf):
-                            ax.annotate("I", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
+                            ax.annotate("변곡점", xy=(x0, y0), xytext=(6, -12), textcoords="offset points",
                                         color="green", fontsize=10, fontfamily="sans-serif")
                     if extremum_xs or inflection_xs:
                         ax.legend(loc="upper right", fontsize=10)
