@@ -4,6 +4,16 @@ import sympy as sp
 import streamlit as st
 from sympy import SympifyError
 
+plt.rcParams.update({
+    "font.family": "serif",
+    "font.serif": ["DejaVu Serif", "Times New Roman", "Georgia"],
+    "font.weight": "light",
+    "mathtext.fontset": "cm",
+    "mathtext.rm": "serif",
+    "mathtext.it": "serif:italic",
+    "mathtext.bf": "serif:light"
+})
+
 st.set_page_config(page_title="일변수 함수 그래프", layout="wide")
 
 st.title("📈 일변수 함수 그래프 그리기")
@@ -32,9 +42,9 @@ if expr_input:
         else:
             fig, ax = plt.subplots()
             ax.plot(xs[mask], ys[mask], color="#1f77b4", linewidth=2)
-            ax.set_xlabel("x")
-            ax.set_ylabel("f(x)")
-            ax.set_title(f"f(x) = {expr_input}")
+            ax.set_xlabel("x", fontsize=12, fontfamily="serif")
+            ax.set_ylabel("f(x)", fontsize=12, fontfamily="serif")
+            ax.set_title(f"f(x) = {expr_input}", fontdict={"fontsize": 18, "fontfamily": "serif", "fontweight": "bold"})
 
             ax.axhline(0, color="black", linewidth=1)
             ax.axvline(0, color="black", linewidth=1)
