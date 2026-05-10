@@ -464,7 +464,6 @@ if expr_input:
             st.write("**4. 함수의 증가/감소, 극대와 극소, 곡선의 볼록성과 변곡점 (증감표)**")
             variation_table = build_variation_table(expr, x, derivative, second_derivative, derivative_fn, second_derivative_fn, extremum_xs, inflection_xs, x_min, x_max)
             st.markdown(variation_table)
-            st.markdown("- y' 행: 함수의 증감. + (증가) / - (감소) / 0 (극값)  \n- y'' 행: 함수의 볼록성. + (아래로 볼록) / - (위로 볼록) / 0 (변곡점)  \n- y 행: 함수의 개형. ↗ (증가) / ↘ (감소) / 극소/극대/변곡점 표시")
 
             st.write("**5. 극한과 점근선**")
             st.markdown(f"- 우극한: $%s$  \n- 좌극한: $%s$" % (sp.latex(sp.limit(expr, x, sp.oo)), sp.latex(sp.limit(expr, x, -sp.oo))))
